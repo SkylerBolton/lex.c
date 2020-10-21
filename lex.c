@@ -125,9 +125,8 @@ int main(int argc, char *argv[])
 	char ch;
 	char buffer[32];
 	error_type error = none;
-	int i, j = 0,  val = 0;
+	int i, j = 0;
 	FILE *fp;
-	token_type current;
 
 	// Initialize symbol hash table
 	ssym['+'] = plussym;
@@ -230,15 +229,14 @@ int main(int argc, char *argv[])
 
 		else if(issymbol(ch))
 		{
-			
+
 		}
 		else
 		{
-			// Error.
+			error = invalidsym;
 		}
 
-		// Add this to lexeme_table
-		printf("%s\n",lexeme_table[j].name);
+		printf("%s | %d\n", lexeme_table[j].name, lexeme_table[j].token);
 		j++;
 
 		// clean buffer and get ready for next iteration
@@ -251,6 +249,12 @@ int main(int argc, char *argv[])
 		i = 1;
 	}
 
+	// Why is this broken?
+	printf("\n\nLEXEME LIST\n");
+	for(i = 0; i < j; i++)
+	{
+		printf("%s | %d\n", lexeme_table[i].name, lexeme_table[i].token);
+	}
 	// Print file contents.
 
 	// Print part 2.
