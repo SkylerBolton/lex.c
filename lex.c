@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define MAX_IDENTIFIER_LENGTH 11
 #define MAX_NUMBER_LENGTH 5
@@ -29,7 +30,7 @@ token_type ssym[256];
 // Error type declaration
 typedef enum
 {
-	invalidid = 1, numtoolong, idtoolong, invalidsym
+	invalidid = 1, numtoolong, idtoolong, invalidsym, none
 } error_type;
 
 // Lexeme struct
@@ -107,20 +108,6 @@ token_type getAlphaTokenType(char *s)
 		return identsym;
 }
 
-// Might be better to put this in main for error detection.
-token_type getDigitTokenType(char *s)
-{
-	int i;
-	for (i = 0; s[i] != '\0'; i++)
-	{
-		// Bad idenifier name.
-		if (isalpha(s[i]))
-		{
-			return identsym;
-		}
-	}
-	return numbersym;
-}
 
 int issymbol(char c)
 {
@@ -137,7 +124,8 @@ int main(int argc, char *argv[])
 	// Initialize variables.
 	char ch;
 	char buffer[32];
-	int i, j = 0, error = 0;
+	error_type error = none;
+	int i, j = 0,  val = 0;
 	FILE *fp;
 	token_type current;
 
@@ -177,14 +165,14 @@ int main(int argc, char *argv[])
 		{
 			ch = fgetc(fp);
 			buffer[0] = ch;
+			i = 1;
 			continue;
 		}
 
 		// Either a reserved word or idenifier.
-		if(isalpha(ch))
+		else if(isalpha(ch))
 		{
 			ch = fgetc(fp);
-
 			// Continue adding to buffer
 			while(ch != EOF && (isalpha(ch) || isdigit(ch)))
 			{
@@ -192,16 +180,57 @@ int main(int argc, char *argv[])
 				ch = fgetc(fp);
 				i++;
 			}
+
+			if(i > 12)
+			{
+				error = idtoolong;
+			}
+
+			lexeme_table[j].name = buffer;
+			lexeme_table[j].value = 0;
+			lexeme_table[j].token = getAlphaTokenType(buffer);
+			lexeme_table[j].error = error;
 		}
 
+		// Either a number or idenifier.
 		else if(isdigit(ch))
 		{
+			ch = fgetc(fp);
+			// Continue adding to buffer
+			while(ch != EOF && (isalpha(ch) || isdigit(ch)))
+			{
+				if(isalpha(ch))
+				{
+					error = invalidid;
+				}
 
+				buffer[i] = ch;
+				ch = fgetc(fp);
+				i++;
+			}
+
+			if(i > 5)
+			{
+				error = idtoolong;
+			}
+
+			lexeme_table[j].name = buffer;
+			if(error == invalidid)
+			{
+				lexeme_table[j].value = 0;
+				lexeme_table[j].token = identsym;
+			}
+			else
+			{
+				lexeme_table[j].value = atoi(buffer);
+				lexeme_table[j].token = numbersym;
+			}
+			lexeme_table[j].error = error;
 		}
 
 		else if(issymbol(ch))
 		{
-
+			
 		}
 		else
 		{
@@ -209,10 +238,7 @@ int main(int argc, char *argv[])
 		}
 
 		// Add this to lexeme_table
-		lexeme_table[j].name = buffer;
-		lexeme_table[j].value = 0; // fix
-		lexeme_table[j].token = getAlphaTokenType(buffer);
-		lexeme_table[j].error = error;
+		printf("%s\n",lexeme_table[j].name);
 		j++;
 
 		// clean buffer and get ready for next iteration
