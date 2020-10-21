@@ -76,10 +76,5 @@ int main(int argc, char *argv[])
 	ssym['/' * 2 + '*'] = commentsym;
 	ssym['*' * 2 + '/'] = endcommentsym;
 
-	// Declarations
-	char c;
-	int lexcount = 0;
-	FILE *fp
-
 	return 0;
 }
