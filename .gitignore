@@ -1,0 +1,4 @@
+*.doc
+*.txt
+!testinput1.txt
+!testoutput1.txt
