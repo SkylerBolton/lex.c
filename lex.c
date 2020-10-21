@@ -12,14 +12,50 @@
 // Token declaration
 typedef enum
 {
-	nulsym = 1, identsym, numbersym, plussym, minussym,	multsym, slashsym, 
-	oddsym, eqsym, neqsym, lessym, leqsym, gtrsym, geqsym, lparentsym, 
-	rparentsym, commasym, semicolonsym,	periodsym, becomessym, beginsym, endsym, 
-	ifsym, thensym,	whilesym, dosym, callsym, constsym, varsym, procsym, 
+	nulsym = 1, identsym, numbersym, plussym, minussym,	multsym, slashsym,
+	oddsym, eqsym, neqsym, lessym, leqsym, gtrsym, geqsym, lparentsym,
+	rparentsym, commasym, semicolonsym,	periodsym, becomessym, beginsym, endsym,
+	ifsym, thensym,	whilesym, dosym, callsym, constsym, varsym, procsym,
 	writesym, readsym, elsesym, commentsym, endcommentsym
 } token_type;
 
-// These next 3 functions the token_type of the string.
+// Reserved words declaration
+char *reserved[] = { "const", "var", "procedure", "call", "begin", "end", "if",
+					 "then", "else", "while", "do", "read", "write", "odd" };
+
+// Special symbols hash table declaration
+token_type ssym[256];
+
+// Error type declaration
+typedef enum
+{
+	invalidid = 1, numtoolong, idtoolong, invalidsym
+} error_type;
+
+// Lexeme struct
+typedef struct lexeme
+{
+	char* name;
+	int value;
+	token_type token;
+	error_type error;
+} lexeme;
+
+// Lexeme table declaration
+lexeme lexeme_table[MAX_TABLE_SIZE];
+
+// TODO: declare / initialize variables in main
+// TODO: initialize file IO
+// TODO: setup readings according to state diagram (use switch?)
+// TODO: isReserved() method: check if lexeme is reserved word
+//		 should be simple check: loop, if(!strcmp) return true else return false
+//		 we may need the token type instead in which case make sure reseved list
+//		 aligns with token_type enum and return offset of i when reserved word
+//		 is found
+// TODO: printLexeme() method: check lexeme token type, if it's an error, and
+// 		 print accordingly
+
+// Should these take lexeme structs instead?
 token_type getAlphaTokenType(char *s)
 {
 	if (strcmp(s, "const") == 0)
@@ -86,180 +122,115 @@ token_type getDigitTokenType(char *s)
 	return numbersym;
 }
 
-
-token_type getSymbolTokenType(char *s)
+int issymbol(char c)
 {
-	if(s[0] == '+')
-		return plussym;
+	return 1;
+}
 
-	else if(s[0] == '-')
-		return minussym;
+void printLexeme(char *s)
+{
 
-	else if(s[0] == '*')
-		if(s[1] == '/')
-			return endcommentsym;
-		else
-			return multsym;
-
-	else if(s[0] == '/')
-		if(s[1] == '*')
-			return commentsym;
-		else
-			return slashsym;
-
-	else if(s[0] == '(')
-		return lparentsym;
-
-	else if(s[0] == ')')
-		return rparentsym;
-
-	else if(s[0] == '=')
-		return eqsym;
-
-	else if(s[0] == ',')
-		return commasym;
-
- 	else if(s[0] == '.')
-		return commasym;
-
-	else if(s[0] == '<')
-		if(s[1] == '=')
-			return leqsym;
-		else
-			return lessym;
-
-	else if(s[0] == '>')
-		if(s[1] == '=')
-			return geqsym;
-		else
-			return gtrsym;
-
-	else if(s[0] == ';')
-		return semicolonsym;
-
-	// :=
-	else
-		return becomessym;
 }
 
 int main(int argc, char *argv[])
 {
-	// Make declarations
-	int i, j;
-	int numLexemes;
-	int commentFlag = 0;
-	token_type current;
+	// Initialize variables.
+	char ch;
+	char buffer[32];
+	int i, j = 0, error = 0;
 	FILE *fp;
+	token_type current;
 
-	// HARDCODED ARRAY.
-	// TODO: create this from a file.
-	char array[18][12] = {{"var"},
-						 {"x"},
-						 {","},
-						 {"y"},
-					   	 {";"},
-						 {"begin"},
-						 {"y"},
-						 {":="},
-						 {"3"},
-						 {";"},
-						 {"x"},
-						 {":="},
-						 {"y"},
-						 {"+"},
-						 {"56"},
-						 {";"},
-						 {"end"},
-						 {"."}};
+	// Initialize symbol hash table
+	ssym['+'] = plussym;
+	ssym['-'] = minussym;
+	ssym['*'] = multsym;
+	ssym['/'] = slashsym;
+	ssym['('] = lparentsym;
+	ssym[')'] = rparentsym;
+	ssym['='] = eqsym;
+	ssym[','] = commasym;
+	ssym['.'] = periodsym;
+	ssym['<'] = lessym;
+	ssym['>'] = gtrsym;
+	ssym[';'] = semicolonsym;
+	ssym['<' * 2 + '>'] = neqsym;
+	ssym['<' * 2 + '='] = leqsym;
+	ssym['>' * 2 + '='] = geqsym;
+	ssym['/' * 2 + '*'] = commentsym;
+	ssym['*' * 2 + '/'] = endcommentsym;
 
-	// Hardcoded length
-	numLexemes = 18;
-
-	// Open input file
+	// Read file into lexeme_table(?)
 	if((fp = fopen(argv[1], "r")) == NULL)
 	{
 		printf("Unable to open file :(\n");
 		return 1;
 	}
 
-	/* Print contents of array.
-	printf("Array contents:");
-	for(i = 0; i < numLexemes; i++)
+	i = 1;
+	ch = fgetc(fp);
+	buffer[0] = ch;
+	while(ch != EOF)
 	{
-		printf("\n");
-		for(j = 0; array[i][j] != '\0'; j++)
+		// Ignore.
+		if(isspace(ch))
 		{
-			printf("%c", array[i][j]);
+			ch = fgetc(fp);
+			buffer[0] = ch;
+			continue;
 		}
-	}
-	printf("\n\n");
-	*/
 
-	printf("\nLexeme Table:\n");
-	printf("lexeme     token type\n");
-	for(i = 0; i < numLexemes; i++)
-	{
-		// Ignores everything until we see "*/".
-		// This could be done while reading the file instead to make this part faster.
-		if (commentFlag)
+		// Either a reserved word or idenifier.
+		if(isalpha(ch))
 		{
-			printf("INSIDE COMMENT\n");
-			if(isalpha(array[i][0]))
-			{
-				continue;
-			}
+			ch = fgetc(fp);
 
-			else if(isdigit(array[i][0]))
+			// Continue adding to buffer
+			while(ch != EOF && (isalpha(ch) || isdigit(ch)))
 			{
-				continue;
-			}
-
-			else
-			{
-				current = getSymbolTokenType(array[i]);
-				if(current == endcommentsym)
-				{
-					commentFlag = 0;
-				}
+				buffer[i] = ch;
+				ch = fgetc(fp);
+				i++;
 			}
 		}
 
-		// This is when we aren't in a comment block.
+		else if(isdigit(ch))
+		{
+
+		}
+
+		else if(issymbol(ch))
+		{
+
+		}
 		else
 		{
-			// array[i] is either a reserved word or identifer.
-			if(isalpha(array[i][0]))
-			{
-				current = getAlphaTokenType(array[i]);
-				printf("%s | %d\n", array[i], current);
-				// Prepare for part 3
-			}
-
-			// array[i] is either a number or a badly named identifier.
-			else if(isdigit(array[i][0]))
-			{
-				current = getDigitTokenType(array[i]);
-				// TODO: check for int length.
-				printf("%s | %d\n", array[i], current);
-			}
-
-			// array[i] is a symbol.
-			else
-			{
-				current = getSymbolTokenType(array[i]);
-				if(current == commentsym)
-				{
-					commentFlag = 1;
-				}
-				else
-				{
-					printf("%s | %d\n", array[i], current);
-				}
-			}
+			// Error.
 		}
+
+		// Add this to lexeme_table
+		lexeme_table[j].name = buffer;
+		lexeme_table[j].value = 0; // fix
+		lexeme_table[j].token = getAlphaTokenType(buffer);
+		lexeme_table[j].error = error;
+		j++;
+
+		// clean buffer and get ready for next iteration
+		for(i = 0; i < 32; i++)
+		{
+			buffer[i] = '\0';
+		}
+		ch = fgetc(fp);
+		buffer[0] = ch;
+		i = 1;
 	}
 
-	// This is where we would print part 3 using info stored during the previous parts.
+	// Print file contents.
+
+	// Print part 2.
+
+	// Print part 3.
+
 
 	return 0;
 }
