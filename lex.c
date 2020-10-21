@@ -70,11 +70,16 @@ int main(int argc, char *argv[])
 	ssym['<'] = lessym;
 	ssym['>'] = gtrsym;
 	ssym[';'] = semicolonsym;
-	ssym['<' * 16 + '>'] = neqsym;
-	ssym['<' * 16 + '='] = leqsym;
-	ssym['>' * 16 + '='] = geqsym;
-	ssym['/' * 16 + '*'] = commentsym;
-	ssym['*' * 16 + '/'] = endcommentsym;
+	ssym['<' * 2 + '>'] = neqsym;
+	ssym['<' * 2 + '='] = leqsym;
+	ssym['>' * 2 + '='] = geqsym;
+	ssym['/' * 2 + '*'] = commentsym;
+	ssym['*' * 2 + '/'] = endcommentsym;
+
+	// Declarations
+	char c;
+	int lexcount = 0;
+	FILE *fp
 
 	return 0;
 }
