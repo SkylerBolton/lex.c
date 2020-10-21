@@ -1,5 +1,5 @@
-// Alejandro Herrada
 // Skyler Bolton
+// Alejandro Herrada
 
 #include <stdio.h>
 #include <ctype.h>
@@ -7,15 +7,16 @@
 
 #define MAX_IDENTIFIER_LENGTH 11
 #define MAX_NUMBER_LENGTH 5
+#define MAX_TABLE_SIZE 500
 
+// Token declaration
 typedef enum
 {
-	nulsym = 1, identsym, numbersym, plussym, minussym,
-	multsym,  slashsym, oddsym, eqsym, neqsym, lessym, leqsym,
-	gtrsym, geqsym, lparentsym, rparentsym, commasym, semicolonsym,
-	periodsym, becomessym, beginsym, endsym, ifsym, thensym,
-	whilesym, dosym, callsym, constsym, varsym, procsym, writesym,
-	readsym, elsesym, commentsym, endcommentsym
+	nulsym = 1, identsym, numbersym, plussym, minussym,	multsym, slashsym, 
+	oddsym, eqsym, neqsym, lessym, leqsym, gtrsym, geqsym, lparentsym, 
+	rparentsym, commasym, semicolonsym,	periodsym, becomessym, beginsym, endsym, 
+	ifsym, thensym,	whilesym, dosym, callsym, constsym, varsym, procsym, 
+	writesym, readsym, elsesym, commentsym, endcommentsym
 } token_type;
 
 // These next 3 functions the token_type of the string.
