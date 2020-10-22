@@ -99,14 +99,17 @@ int main(int argc, char *argv[])
 	}
 
 	ch = fgetc(fp);
-	printf("%c", ch);
+  	if(ch != EOF)
+  		printf("%c", ch);
 	while(ch != EOF)
 	{
 		// Ignore whitespace
 		if(isspace(ch) || iscntrl(ch))
 		{
 			ch = fgetc(fp);
-			printf("%c", ch);
+			if(ch != EOF)
+  				if(ch != EOF)
+  					printf("%c", ch);
 		}
 		// Reserved word or identifier
 		else if(isalpha(ch))
@@ -119,9 +122,11 @@ int main(int argc, char *argv[])
 			{
 				buffer[i] =  ch;
 				i++;
-				printf("%c", ch);
+				if(ch != EOF)
+  					printf("%c", ch);
 			}
-			printf("%c", ch);
+			if(ch != EOF)
+  				printf("%c", ch);
 
 			// Add lexeme to table
 			buffer[i] = '\0';
@@ -145,14 +150,24 @@ int main(int argc, char *argv[])
 			{
 				buffer[i] = ch;
 				i++;
-				printf("%c", ch);
+				if(ch != EOF)
+  					printf("%c", ch);
 
 				if(isalpha(ch))
 					error = invalidid;
 			}
-			printf("%c", ch);
+			if(ch != EOF)
+				printf("%c", ch);
 
 			// Add lexeme to table
+			if(error == 0)
+			{
+				if(atoi(buffer) > 99999)
+				{
+					error = numtoolong;
+				}
+			}
+
 			buffer[i] = '\0';
 			if(error) // If it's an invalid identifier
 			{
@@ -172,7 +187,7 @@ int main(int argc, char *argv[])
 
 			j++;
 		}
-		// TODO: tokenize comments
+
 		else
 		{
 			buffer[0] = ch;
@@ -199,7 +214,8 @@ int main(int argc, char *argv[])
 				{
 					buffer[i] = ch;
 					i++;
-					printf("%c", ch);
+					if(ch != EOF)
+						printf("%c", ch);
 
 					buffer[i] = '\0';
 
@@ -231,7 +247,8 @@ int main(int argc, char *argv[])
 				{
 					buffer[i] = ch;
 					i++;
-					printf("%c", ch);
+					if(ch != EOF)
+						printf("%c", ch);
 
 					buffer[i] = '\0';
 
@@ -263,7 +280,8 @@ int main(int argc, char *argv[])
 				{
 					buffer[i] = ch;
 					i++;
-					printf("%c", ch);
+					if(ch != EOF)
+						printf("%c", ch);
 
 					buffer[i] = '\0';
 
@@ -336,17 +354,54 @@ int main(int argc, char *argv[])
 	for(i = 0; i < j; i++)
 	{
 		lexeme l = lexeme_table[i];
-		if (l.value > 0)
+
+		// This is so ugly oh my god
+		if(l.error > 0)
 		{
-			printf("%-32d %d\n", l.value, l.token);
+			if(l.value > 0)
+				printf("%-32d ", l.value);
+
+			else
+				printf("%-32s ", l.name);
+
+			if(l.error == 1)
+				printf("ERROR: Invalid identifier.\n");
+
+			else if(l.error == 2)
+				printf("ERROR: Number too long.\n");
+
+			else if(l.error == 3)
+				printf("ERROR: Identifier too long.\n");
+
+			else
+				printf("ERROR: Invalid symbol.\n");
+
+			continue;
 		}
+
+		if(l.value > 0)
+			printf("%-32d %d\n", l.value, l.token);
+
 		else
-		{
 			printf("%-32s %d\n", l.name, l.token);
+
+		if(l.error > 0)
+		{
+			if(l.error == 1)
+				printf("ERROR: Invalid identifier.\n");
+
+			else if(l.error == 2)
+				printf("ERROR: Number too long.\n");
+
+			else if(l.error == 3)
+				printf("ERROR: Identifier too long.\n");
+
+			else
+				printf("ERROR: Invalid symbol.\n");
 		}
 	}
 
-	printf("\nLexeme List:\n");
+	printf("\n\nLexeme List:\n");
 	for(i = 0; i < j; i++)
 	{
 		lexeme l = lexeme_table[i];
