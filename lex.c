@@ -59,6 +59,8 @@ void printLexeme(char *s)
 
 }
 
+// TODO		break each condition inside the while loop into its own method to 
+//			avoid tokenizing unnecessary characters
 int main(int argc, char *argv[])
 {
 	// Initialize variables
@@ -170,10 +172,133 @@ int main(int argc, char *argv[])
 			
 			j++;
 		}
+		// TODO: tokenize comments
+		buffer[0] = ch;
+		i = 1;
+		error = 0;
+
+		if(ch == '+' || ch == '-' || ch == '*' || ch == '=' || ch == '(' || 
+			ch == ')' || ch == ',' || ch == ';' || ch == '.')
+		{
+			buffer[i] = '\0';
+			
+			// Add lexeme to table
+			lexeme_table[j].name = malloc(sizeof(char) * (i+1));
+			strcpy(lexeme_table[j].name, buffer);
+			lexeme_table[j].token = ssym[ch];
+			lexeme_table[j].error = error;
+
+			j++;
+		}
+		else if(ch == '<')
+		{
+			ch = fgetc(fp);
+			if(ch = '>' || ch == '=') // "<>" | "<=" tokens
+			{
+				buffer[i] = ch;
+				i++;
+				printf("%c", ch);
+
+				buffer[i] = '\0';
+
+				// Add lexeme to table
+				lexeme_table[j].name = malloc(sizeof(char) * (i+1));
+				strcpy(lexeme_table[j].name, buffer);
+				lexeme_table[j].token = ssym[buffer[0] * 2 + buffer[1]];
+				lexeme_table[j].error = error;
+
+				j++;
+			}
+			else // "<" token
+			{
+				buffer[i] = '\0';
+			
+				// Add lexeme to table
+				lexeme_table[j].name = malloc(sizeof(char) * (i+1));
+				strcpy(lexeme_table[j].name, buffer);
+				lexeme_table[j].token = ssym[ch];
+				lexeme_table[j].error = error;
+
+				j++;
+			}
+		}
+		else if(ch == '>')
+		{
+			ch = fgetc(fp);
+			if(ch == '=') // ">=" token
+			{
+				buffer[i] = ch;
+				i++;
+				printf("%c", ch);
+
+				buffer[i] = '\0';
+
+				// Add lexeme to table
+				lexeme_table[j].name = malloc(sizeof(char) * (i+1));
+				strcpy(lexeme_table[j].name, buffer);
+				lexeme_table[j].token = ssym[buffer[0] * 2 + buffer[1]];
+				lexeme_table[j].error = error;
+
+				j++;
+			}
+			else // ">" token
+			{
+				buffer[i] = '\0';
+			
+				// Add lexeme to table
+				lexeme_table[j].name = malloc(sizeof(char) * (i+1));
+				strcpy(lexeme_table[j].name, buffer);
+				lexeme_table[j].token = ssym[ch];
+				lexeme_table[j].error = error;
+
+				j++;
+			}
+		}
+		else if(ch == ':')
+		{
+			ch = fgetc(fp);
+			if(ch == '=') // ":=" token
+			{
+				buffer[i] = ch;
+				i++;
+				printf("%c", ch);
+
+				buffer[i] = '\0';
+
+				// Add lexeme to table
+				lexeme_table[j].name = malloc(sizeof(char) * (i+1));
+				strcpy(lexeme_table[j].name, buffer);
+				lexeme_table[j].token = ssym[buffer[0] * 2 + buffer[1]];
+				lexeme_table[j].error = error;
+
+				j++;
+			}
+			else // Invalid symbol
+			{
+				buffer[i] = '\0';
+			
+				// Add lexeme to table
+				lexeme_table[j].name = malloc(sizeof(char) * (i+1));
+				strcpy(lexeme_table[j].name, buffer);
+				lexeme_table[j].token = nulsym;
+				lexeme_table[j].error = invalidsym;
+
+				j++;
+			}
+		}
+		else
+		{
+			buffer[i] = '\0';
+			
+			// Add lexeme to table
+			lexeme_table[j].name = malloc(sizeof(char) * (i+1));
+			strcpy(lexeme_table[j].name, buffer);
+			lexeme_table[j].token = nulsym;
+			lexeme_table[j].error = invalidsym;
+
+			j++;
 		
-		// TODO: Symbols
-		// what a pain, dunno if i should tokenize something like `+++`
-		// as 3 plus symbols or as an invalid symbol
+		}
 	}
 	
 	printf("\n\n");
