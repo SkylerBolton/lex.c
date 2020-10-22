@@ -21,7 +21,7 @@ typedef enum
 } token_type;
 
 // Reserved words declaration
-char *reserved[] = { "odd", "begin", "end", "if", "then", "while", "do", "call", 
+char *reserved[] = { "odd", "begin", "end", "if", "then", "while", "do", "call",
 					 "const", "var", "procedure", "write", "read", "else" };
 
 // Error type declaration
@@ -59,7 +59,7 @@ void printLexeme(char *s)
 
 }
 
-// TODO		break each condition inside the while loop into its own method to 
+// TODO		break each condition inside the while loop into its own method to
 //			avoid tokenizing unnecessary characters
 int main(int argc, char *argv[])
 {
@@ -67,13 +67,13 @@ int main(int argc, char *argv[])
 	lexeme lexeme_table[MAX_TABLE_SIZE];
 	char ch;
 	char buffer[32];
-	int i, j = 0;
+	int i, j = 0, k = 0;
 	error_type error;
 	FILE *fp;
 
 	// Special symbols hash table declaration
 	token_type ssym[256];
-	
+
 	// Initialize symbol hash table
 	ssym['+'] = plussym;
 	ssym['-'] = minussym;
@@ -100,17 +100,32 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	while((ch = fgetc(fp)) != EOF)
+	ch = fgetc(fp);
+	printf("%c", ch);
+	while(ch != EOF)
 	{
-		printf("%c", ch);
+		buffer[0] = ch;
+		i = 1;
+		error = 0;
+
+		printf("\nWhile loop iteration #%d. ch = '%c'.", k, ch);
+
+		//printf("%c", ch);
 		// Ignore whitespace
 		if(isspace(ch) || iscntrl(ch))
 		{
+
+			printf("\nWhitespace found.\n");
+			// NEWLY ADDED
+			ch = fgetc(fp);
+			printf("%c", ch);
+
 			continue;
 		}
 		// Reserved word or identifier
 		else if(isalpha(ch))
 		{
+			printf("\nisalpha() true.\n");
 			buffer[0] = ch;
 			i = 1;
 			error = 0;
@@ -122,7 +137,7 @@ int main(int argc, char *argv[])
 				printf("%c", ch);
 			}
 			printf("%c", ch);
-			
+
 			// Add lexeme to table
 			buffer[i] = '\0';
 			lexeme_table[j].name = malloc(sizeof(char) * (i+1));
@@ -130,13 +145,18 @@ int main(int argc, char *argv[])
 			lexeme_table[j].token = getAlphaTokenType(buffer);
 			if(i > 12 && lexeme_table[j].token == identsym)
 				error = idtoolong;
-			lexeme_table[j].error = error; 
+			lexeme_table[j].error = error;
+
+			// NEWLY ADDED
+			ch = fgetc(fp);
+			printf("%c", ch);
 
 			j++;
 		}
 		// Number or invalid identifier
 		else if(isdigit(ch))
 		{
+			printf("isdigit() true.\n");
 			buffer[0] = ch;
 			i = 1;
 			error = 0;
@@ -169,50 +189,23 @@ int main(int argc, char *argv[])
 					error = numtoolong;
 				lexeme_table[j].error = error;
 			}
-			
-			j++;
-		}
-		// TODO: tokenize comments
-		buffer[0] = ch;
-		i = 1;
-		error = 0;
 
-		if(ch == '+' || ch == '-' || ch == '*' || ch == '=' || ch == '(' || 
-			ch == ')' || ch == ',' || ch == ';' || ch == '.')
-		{
-			buffer[i] = '\0';
-			
-			// Add lexeme to table
-			lexeme_table[j].name = malloc(sizeof(char) * (i+1));
-			strcpy(lexeme_table[j].name, buffer);
-			lexeme_table[j].token = ssym[ch];
-			lexeme_table[j].error = error;
-
-			j++;
-		}
-		else if(ch == '<')
-		{
+			// NEWLY ADDED
 			ch = fgetc(fp);
-			if(ch = '>' || ch == '=') // "<>" | "<=" tokens
-			{
-				buffer[i] = ch;
-				i++;
-				printf("%c", ch);
+			printf("%c", ch);
 
-				buffer[i] = '\0';
+			j++;
+		}
 
-				// Add lexeme to table
-				lexeme_table[j].name = malloc(sizeof(char) * (i+1));
-				strcpy(lexeme_table[j].name, buffer);
-				lexeme_table[j].token = ssym[buffer[0] * 2 + buffer[1]];
-				lexeme_table[j].error = error;
+		else
+		{
+			printf("\nThis is a symbol.\n");
 
-				j++;
-			}
-			else // "<" token
+			if(ch == '+' || ch == '-' || ch == '*' || ch == '=' || ch == '(' ||
+				ch == ')' || ch == ',' || ch == ';' || ch == '.')
 			{
 				buffer[i] = '\0';
-			
+
 				// Add lexeme to table
 				lexeme_table[j].name = malloc(sizeof(char) * (i+1));
 				strcpy(lexeme_table[j].name, buffer);
@@ -221,62 +214,106 @@ int main(int argc, char *argv[])
 
 				j++;
 			}
-		}
-		else if(ch == '>')
-		{
-			ch = fgetc(fp);
-			if(ch == '=') // ">=" token
+			else if(ch == '<')
 			{
-				buffer[i] = ch;
-				i++;
-				printf("%c", ch);
+				ch = fgetc(fp);
+				if(ch == '>' || ch == '=') // "<>" | "<=" tokens
+				{
+					buffer[i] = ch;
+					i++;
+					printf("%c", ch);
 
-				buffer[i] = '\0';
+					buffer[i] = '\0';
 
-				// Add lexeme to table
-				lexeme_table[j].name = malloc(sizeof(char) * (i+1));
-				strcpy(lexeme_table[j].name, buffer);
-				lexeme_table[j].token = ssym[buffer[0] * 2 + buffer[1]];
-				lexeme_table[j].error = error;
+					// Add lexeme to table
+					lexeme_table[j].name = malloc(sizeof(char) * (i+1));
+					strcpy(lexeme_table[j].name, buffer);
+					lexeme_table[j].token = ssym[buffer[0] * 2 + buffer[1]];
+					lexeme_table[j].error = error;
 
-				j++;
+					j++;
+				}
+				else // "<" token
+				{
+					buffer[i] = '\0';
+
+					// Add lexeme to table
+					lexeme_table[j].name = malloc(sizeof(char) * (i+1));
+					strcpy(lexeme_table[j].name, buffer);
+					lexeme_table[j].token = ssym[ch];
+					lexeme_table[j].error = error;
+
+					j++;
+				}
 			}
-			else // ">" token
+			else if(ch == '>')
 			{
-				buffer[i] = '\0';
-			
-				// Add lexeme to table
-				lexeme_table[j].name = malloc(sizeof(char) * (i+1));
-				strcpy(lexeme_table[j].name, buffer);
-				lexeme_table[j].token = ssym[ch];
-				lexeme_table[j].error = error;
+				ch = fgetc(fp);
+				if(ch == '=') // ">=" token
+				{
+					buffer[i] = ch;
+					i++;
+					printf("%c", ch);
 
-				j++;
+					buffer[i] = '\0';
+
+					// Add lexeme to table
+					lexeme_table[j].name = malloc(sizeof(char) * (i+1));
+					strcpy(lexeme_table[j].name, buffer);
+					lexeme_table[j].token = ssym[buffer[0] * 2 + buffer[1]];
+					lexeme_table[j].error = error;
+
+					j++;
+				}
+				else // ">" token
+				{
+					buffer[i] = '\0';
+
+					// Add lexeme to table
+					lexeme_table[j].name = malloc(sizeof(char) * (i+1));
+					strcpy(lexeme_table[j].name, buffer);
+					lexeme_table[j].token = ssym[ch];
+					lexeme_table[j].error = error;
+
+					j++;
+				}
 			}
-		}
-		else if(ch == ':')
-		{
-			ch = fgetc(fp);
-			if(ch == '=') // ":=" token
+			else if(ch == ':')
 			{
-				buffer[i] = ch;
-				i++;
-				printf("%c", ch);
+				ch = fgetc(fp);
+				if(ch == '=') // ":=" token
+				{
+					buffer[i] = ch;
+					i++;
+					printf("%c", ch);
 
-				buffer[i] = '\0';
+					buffer[i] = '\0';
 
-				// Add lexeme to table
-				lexeme_table[j].name = malloc(sizeof(char) * (i+1));
-				strcpy(lexeme_table[j].name, buffer);
-				lexeme_table[j].token = ssym[buffer[0] * 2 + buffer[1]];
-				lexeme_table[j].error = error;
+					// Add lexeme to table
+					lexeme_table[j].name = malloc(sizeof(char) * (i+1));
+					strcpy(lexeme_table[j].name, buffer);
+					lexeme_table[j].token = ssym[buffer[0] * 2 + buffer[1]];
+					lexeme_table[j].error = error;
 
-				j++;
+					j++;
+				}
+				else // Invalid symbol
+				{
+					buffer[i] = '\0';
+
+					// Add lexeme to table
+					lexeme_table[j].name = malloc(sizeof(char) * (i+1));
+					strcpy(lexeme_table[j].name, buffer);
+					lexeme_table[j].token = nulsym;
+					lexeme_table[j].error = invalidsym;
+
+					j++;
+				}
 			}
-			else // Invalid symbol
+			else
 			{
 				buffer[i] = '\0';
-			
+
 				// Add lexeme to table
 				lexeme_table[j].name = malloc(sizeof(char) * (i+1));
 				strcpy(lexeme_table[j].name, buffer);
@@ -284,23 +321,16 @@ int main(int argc, char *argv[])
 				lexeme_table[j].error = invalidsym;
 
 				j++;
-			}
-		}
-		else
-		{
-			buffer[i] = '\0';
-			
-			// Add lexeme to table
-			lexeme_table[j].name = malloc(sizeof(char) * (i+1));
-			strcpy(lexeme_table[j].name, buffer);
-			lexeme_table[j].token = nulsym;
-			lexeme_table[j].error = invalidsym;
 
-			j++;
-		
+			}
+
+			// NEWLY ADDED
+			ch = fgetc(fp);
+			printf("%c", ch);
 		}
+		k++;
 	}
-	
+
 	printf("\n\n");
 	for(i = 0; i < j; i++)
 	{
@@ -308,5 +338,21 @@ int main(int argc, char *argv[])
 		printf("Lexeme %d: name %s value %d token %d error %d\n",
 				i, l.name, l.value, l.token, l.error);
 	}
+
+	printf("\n\nLexeme Table:\nlexeme | token type\n");
+	for(i = 0; i < j; i++)
+	{
+		lexeme l = lexeme_table[i];
+		if (l.value > 0)
+		{
+			printf("%d | %d\n", l.value, l.token);
+		}
+		else
+		{
+			printf("%s | %d\n", l.name, l.token);
+		}
+	}
+
+
 	return 0;
 }
