@@ -47,7 +47,8 @@ token_type getAlphaTokenType(char *s)
 		if(!strcmp(s, reserved[i]))
 			if(i == 0)
 				return oddsym;
-			return i + 20;
+			else
+				return i + 20;
 	}
 
 	return identsym;
@@ -172,10 +173,9 @@ int main(int argc, char *argv[])
 			
 			// Add lexeme to table
 			buffer[i] = '\0';
-			char name[i + 1];
-			strcpy(name, buffer);
-			lexeme_table[j].name = name;
-			lexeme_table[j].token = getAlphaTokenType(name);
+			lexeme_table[j].name = malloc(sizeof(char) * (i+1));
+			strcpy(lexeme_table[j].name, buffer);
+			lexeme_table[j].token = getAlphaTokenType(buffer);
 			if(i > 12 && lexeme_table[j].token == identsym)
 				error = idtoolong;
 			lexeme_table[j].error = error; 
@@ -202,17 +202,16 @@ int main(int argc, char *argv[])
 
 			// Add lexeme to table
 			buffer[i] = '\0';
-			char name[i + 1];
-			strcpy(name, buffer);
 			if(error) // If it's an invalid identifier
 			{
-				lexeme_table[j].name = name;
+				lexeme_table[j].name = malloc(sizeof(char) * (i+1));
+				strcpy(lexeme_table[j].name, buffer);
 				lexeme_table[j].token = identsym;
 				lexeme_table[j].error = error;
 			}
 			else // If it's an integer
 			{
-				lexeme_table[j].value = atoi(name);
+				lexeme_table[j].value = atoi(buffer);
 				lexeme_table[j].token = numbersym;
 				if(i > 6)
 					error = numtoolong;
