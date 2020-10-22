@@ -27,7 +27,7 @@ char *reserved[] = { "odd", "begin", "end", "if", "then", "while", "do", "call",
 // Error type declaration
 typedef enum
 {
-	invalidid = 1, numtoolong, idtoolong, invalidsym, none
+	invalidid = 1, numtoolong, idtoolong, invalidsym
 } error_type;
 
 // Lexeme struct
@@ -103,12 +103,6 @@ token_type getAlphaTokenType(char *s)
 	*/
 }
 
-
-int issymbol(char c)
-{
-	return 1;
-}
-
 void printLexeme(char *s)
 {
 
@@ -121,6 +115,7 @@ int main(int argc, char *argv[])
 	char ch;
 	char buffer[32];
 	int i, j = 0;
+	error_type error;
 	FILE *fp;
 
 	// Special symbols hash table declaration
@@ -165,8 +160,9 @@ int main(int argc, char *argv[])
 		{
 			buffer[0] = ch;
 			i = 1;
+			error = 0;
 			// Continue adding to buffer
-			while((ch = fgetc(fp)) != EOF && (isalpha(ch) || isdigit(ch)))
+			while((ch = fgetc(fp)) != EOF && isalnum(ch))
 			{
 				buffer[i] =  ch;
 				i++;
@@ -181,66 +177,50 @@ int main(int argc, char *argv[])
 			lexeme_table[j].name = name;
 			lexeme_table[j].token = getAlphaTokenType(name);
 			if(i > 12 && lexeme_table[j].token == identsym)
-				lexeme_table[j].error = idtoolong;
+				error = idtoolong;
+			lexeme_table[j].error = error; 
 
 			j++;
 		}
-		// Number
+		// Number or invalid identifier
 		else if(isdigit(ch))
 		{
 			buffer[0] = ch;
 			i = 1;
+			error = 0;
 			// Continue adding to buffer
-			while((ch = fgetc(fp)) != EOF && (isalpha(ch) || isdigit(ch)))
+			while((ch = fgetc(fp)) != EOF && isalnum(ch))
 			{
 				buffer[i] = ch;
 				i++;
 				printf("%c", ch);
 
-				if()	
+				if(isalpha(ch))
+					error = invalidid;
 			}
+			printf("%c", ch);
 
-			if(i > 5)
-			{
-				error = idtoolong;
-			}
-
-			lexeme_table[j].name = buffer;
-			if(error == invalidid)
-			{
-				lexeme_table[j].value = 0;
-				lexeme_table[j].token = identsym;
-			}
-			else
-			{
-				lexeme_table[j].value = atoi(buffer);
-				lexeme_table[j].token = numbersym;
-			}
-			lexeme_table[j].error = error;
-		}
-		/*
-		else if(issymbol(ch))
-		{
-
-		}
-		else
-		{
-			error = invalidsym;
-		}
-
-		printf("%s | %d\n", lexeme_table[j].name, lexeme_table[j].token);
-		j++;
-
-		// clean buffer and get ready for next iteration
-		for(i = 0; i < 32; i++)
-		{
+			// Add lexeme to table
 			buffer[i] = '\0';
+			char name[i + 1];
+			strcpy(name, buffer);
+			if(error) // If it's an invalid identifier
+			{
+				lexeme_table[j].name = name;
+				lexeme_table[j].token = identsym;
+				lexeme_table[j].error = error;
+			}
+			else // If it's an integer
+			{
+				lexeme_table[j].value = atoi(name);
+				lexeme_table[j].token = numbersym;
+				if(i > 6)
+					error = numtoolong;
+				lexeme_table[j].error = error;
+			}
+			
+			j++;
 		}
-		ch = fgetc(fp);
-		buffer[0] = ch;
-		i = 1;
-	}
-	*/
 	}
 	/*
 	// Why is this broken?
@@ -256,5 +236,12 @@ int main(int argc, char *argv[])
 	// Print part 3.
 
 	*/
+	printf("\n\n");
+	for(i = 0; i < j; i++)
+	{
+		lexeme l = lexeme_table[i];
+		printf("Lexeme %d: name %s, value %d, token %d, error %d\n",
+				i, l.name, l.value, l.token, l.error);
+	}
 	return 0;
 }
