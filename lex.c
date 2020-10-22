@@ -52,56 +52,6 @@ token_type getAlphaTokenType(char *s)
 	}
 
 	return identsym;
-	
-	/*
-	if (strcmp(s, "const") == 0)
-		return constsym;
-
-	else if (strcmp(s, "var") == 0)
-		return varsym;
-
-	else if (strcmp(s, "procedure") == 0)
-		return procsym;
-
-	else if (strcmp(s, "call") == 0)
-		return callsym;
-
-	else if (strcmp(s, "begin") == 0)
-		return beginsym;
-
-	else if (strcmp(s, "end") == 0)
-		return endsym;
-
-	else if (strcmp(s, "if") == 0)
-		return ifsym;
-
-	else if (strcmp(s, "then") == 0)
-		return thensym;
-
-	else if (strcmp(s, "else") == 0)
-		return elsesym;
-
-	else if (strcmp(s, "while") == 0)
-		return whilesym;
-
-	else if (strcmp(s, "do") == 0)
-		return dosym;
-
-	else if (strcmp(s, "while") == 0)
-		return varsym;
-
-	else if (strcmp(s, "read") == 0)
-		return readsym;
-
-	else if (strcmp(s, "write") == 0)
-		return writesym;
-
-	else if (strcmp(s, "odd") == 0)
-		return oddsym;
-
-	else
-		return identsym;
-	*/
 }
 
 void printLexeme(char *s)
@@ -220,26 +170,17 @@ int main(int argc, char *argv[])
 			
 			j++;
 		}
+		
+		// TODO: Symbols
+		// what a pain, dunno if i should tokenize something like `+++`
+		// as 3 plus symbols or as an invalid symbol
 	}
-	/*
-	// Why is this broken?
-	printf("\n\nLEXEME LIST\n");
-	for(i = 0; i < j; i++)
-	{
-		printf("%s | %d\n", lexeme_table[i].name, lexeme_table[i].token);
-	}
-	// Print file contents.
-
-	// Print part 2.
-
-	// Print part 3.
-
-	*/
+	
 	printf("\n\n");
 	for(i = 0; i < j; i++)
 	{
 		lexeme l = lexeme_table[i];
-		printf("Lexeme %d: name %s, value %d, token %d, error %d\n",
+		printf("Lexeme %d: name %s value %d token %d error %d\n",
 				i, l.name, l.value, l.token, l.error);
 	}
 	return 0;
