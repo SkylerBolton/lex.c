@@ -21,11 +21,8 @@ typedef enum
 } token_type;
 
 // Reserved words declaration
-char *reserved[] = { "const", "var", "procedure", "call", "begin", "end", "if",
-					 "then", "else", "while", "do", "read", "write", "odd" };
-
-// Special symbols hash table declaration
-token_type ssym[256];
+char *reserved[] = { "odd", "begin", "end", "if", "then", "while", "do", "call", 
+					 "const", "var", "procedure", "write", "read", "else" };
 
 // Error type declaration
 typedef enum
@@ -42,23 +39,20 @@ typedef struct lexeme
 	error_type error;
 } lexeme;
 
-// Lexeme table declaration
-lexeme lexeme_table[MAX_TABLE_SIZE];
-
-// TODO: declare / initialize variables in main
-// TODO: initialize file IO
-// TODO: setup readings according to state diagram (use switch?)
-// TODO: isReserved() method: check if lexeme is reserved word
-//		 should be simple check: loop, if(!strcmp) return true else return false
-//		 we may need the token type instead in which case make sure reseved list
-//		 aligns with token_type enum and return offset of i when reserved word
-//		 is found
-// TODO: printLexeme() method: check lexeme token type, if it's an error, and
-// 		 print accordingly
-
 // Should these take lexeme structs instead?
 token_type getAlphaTokenType(char *s)
 {
+	for(int i = 0; i < 14; i++)
+	{
+		if(!strcmp(s, reserved[i]))
+			if(i == 0)
+				return oddsym;
+			return i + 20;
+	}
+
+	return identsym;
+	
+	/*
 	if (strcmp(s, "const") == 0)
 		return constsym;
 
@@ -106,6 +100,7 @@ token_type getAlphaTokenType(char *s)
 
 	else
 		return identsym;
+	*/
 }
 
 
@@ -121,13 +116,16 @@ void printLexeme(char *s)
 
 int main(int argc, char *argv[])
 {
-	// Initialize variables.
+	// Initialize variables
+	lexeme lexeme_table[MAX_TABLE_SIZE];
 	char ch;
 	char buffer[32];
-	error_type error = none;
 	int i, j = 0;
 	FILE *fp;
 
+	// Special symbols hash table declaration
+	token_type ssym[256];
+	
 	// Initialize symbol hash table
 	ssym['+'] = plussym;
 	ssym['-'] = minussym;
@@ -154,58 +152,52 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	i = 1;
-	ch = fgetc(fp);
-	buffer[0] = ch;
-	while(ch != EOF)
+	while((ch = fgetc(fp)) != EOF)
 	{
-		// Ignore.
-		if(isspace(ch))
+		printf("%c", ch);
+		// Ignore whitespace
+		if(isspace(ch) || iscntrl(ch))
 		{
-			ch = fgetc(fp);
-			buffer[0] = ch;
-			i = 1;
 			continue;
 		}
-
-		// Either a reserved word or idenifier.
+		// Reserved word or identifier
 		else if(isalpha(ch))
 		{
-			ch = fgetc(fp);
+			buffer[0] = ch;
+			i = 1;
 			// Continue adding to buffer
-			while(ch != EOF && (isalpha(ch) || isdigit(ch)))
+			while((ch = fgetc(fp)) != EOF && (isalpha(ch) || isdigit(ch)))
 			{
-				buffer[i] = ch;
-				ch = fgetc(fp);
+				buffer[i] =  ch;
 				i++;
+				printf("%c", ch);
 			}
+			printf("%c", ch);
+			
+			// Add lexeme to table
+			buffer[i] = '\0';
+			char name[i + 1];
+			strcpy(name, buffer);
+			lexeme_table[j].name = name;
+			lexeme_table[j].token = getAlphaTokenType(name);
+			if(i > 12 && lexeme_table[j].token == identsym)
+				lexeme_table[j].error = idtoolong;
 
-			if(i > 12)
-			{
-				error = idtoolong;
-			}
-
-			lexeme_table[j].name = buffer;
-			lexeme_table[j].value = 0;
-			lexeme_table[j].token = getAlphaTokenType(buffer);
-			lexeme_table[j].error = error;
+			j++;
 		}
-
-		// Either a number or idenifier.
+		// Number
 		else if(isdigit(ch))
 		{
-			ch = fgetc(fp);
+			buffer[0] = ch;
+			i = 1;
 			// Continue adding to buffer
-			while(ch != EOF && (isalpha(ch) || isdigit(ch)))
+			while((ch = fgetc(fp)) != EOF && (isalpha(ch) || isdigit(ch)))
 			{
-				if(isalpha(ch))
-				{
-					error = invalidid;
-				}
-
 				buffer[i] = ch;
-				ch = fgetc(fp);
 				i++;
+				printf("%c", ch);
+
+				if()	
 			}
 
 			if(i > 5)
@@ -226,7 +218,7 @@ int main(int argc, char *argv[])
 			}
 			lexeme_table[j].error = error;
 		}
-
+		/*
 		else if(issymbol(ch))
 		{
 
@@ -248,7 +240,9 @@ int main(int argc, char *argv[])
 		buffer[0] = ch;
 		i = 1;
 	}
-
+	*/
+	}
+	/*
 	// Why is this broken?
 	printf("\n\nLEXEME LIST\n");
 	for(i = 0; i < j; i++)
@@ -261,6 +255,6 @@ int main(int argc, char *argv[])
 
 	// Print part 3.
 
-
+	*/
 	return 0;
 }

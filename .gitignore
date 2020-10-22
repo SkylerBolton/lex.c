@@ -4,3 +4,5 @@
 !testoutput1.txt
 *.png
 a.out
+.vscode/**
+lex
