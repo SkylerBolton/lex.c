@@ -288,7 +288,33 @@ int main(int argc, char *argv[])
 					j++;
 				}
 			}
-			else
+			else if(ch == '/')
+			{
+				ch = fgetc(fp);
+				if(ch == '*') // Start of comment
+				{
+					while((ch = fgetc(fp)) != EOF)
+						if(ch == '*')
+						{
+							ch = fgetc(fp);
+							if(ch == '/') // Exit comment
+								break;
+						}
+				}
+				else // "/" token
+				{
+					buffer[i] = '\0';
+				
+					// Add lexeme to table
+					lexeme_table[j].name = malloc(sizeof(char) * (i+1));
+					strcpy(lexeme_table[j].name, buffer);
+					lexeme_table[j].token = ssym[ch];
+					lexeme_table[j].error = error;
+
+					j++;
+				}
+			}
+			else // Invalid symbol
 			{
 				buffer[i] = '\0';
 				
@@ -305,12 +331,4 @@ int main(int argc, char *argv[])
 				printf("%c", ch);		
 		}
 	}
-	printf("\n\n");
-	for(i = 0; i < j; i++)
-	{
-		lexeme l = lexeme_table[i];
-		printf("Lexeme %d: name %s value %d token %d error %d\n",
-				i, l.name, l.value, l.token, l.error);
-	}
-	return 0;
 }
