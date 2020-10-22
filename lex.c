@@ -384,21 +384,6 @@ int main(int argc, char *argv[])
 
 		else
 			printf("%-32s %d\n", l.name, l.token);
-
-		if(l.error > 0)
-		{
-			if(l.error == 1)
-				printf("ERROR: Invalid identifier.\n");
-
-			else if(l.error == 2)
-				printf("ERROR: Number too long.\n");
-
-			else if(l.error == 3)
-				printf("ERROR: Identifier too long.\n");
-
-			else
-				printf("ERROR: Invalid symbol.\n");
-		}
 	}
 
 	printf("\n\nLexeme List:\n");
