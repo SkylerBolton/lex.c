@@ -352,7 +352,7 @@ int main(int argc, char *argv[])
 					// Add lexeme to table
 					lexeme_table[j].name = malloc(sizeof(char) * (i+1));
 					strcpy(lexeme_table[j].name, buffer);
-					lexeme_table[j].token = ssym[ch];
+					lexeme_table[j].token = slashsym;
 					lexeme_table[j].error = error;
 
 					j++;
