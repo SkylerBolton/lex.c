@@ -63,6 +63,7 @@ int main(int argc, char *argv[])
 {
 	// Initialize variables
 	lexeme lexeme_table[MAX_TABLE_SIZE];
+	lexeme l;
 	char ch;
 	char buffer[32];
 	int i, j = 0;
@@ -188,7 +189,6 @@ int main(int argc, char *argv[])
 
 			j++;
 		}
-
 		else
 		{
 			buffer[0] = ch;
@@ -211,7 +211,7 @@ int main(int argc, char *argv[])
 			else if(ch == '<')
 			{
 				ch = fgetc(fp);
-				if(ch = '>' || ch == '=') // "<>" | "<=" tokens
+				if(ch == '>' || ch == '=') // "<>" | "<=" tokens
 				{
 					buffer[i] = ch;
 					i++;
@@ -235,7 +235,7 @@ int main(int argc, char *argv[])
 					// Add lexeme to table
 					lexeme_table[j].name = malloc(sizeof(char) * (i+1));
 					strcpy(lexeme_table[j].name, buffer);
-					lexeme_table[j].token = ssym[ch];
+					lexeme_table[j].token = lessym;
 					lexeme_table[j].error = error;
 
 					j++;
@@ -268,7 +268,7 @@ int main(int argc, char *argv[])
 					// Add lexeme to table
 					lexeme_table[j].name = malloc(sizeof(char) * (i+1));
 					strcpy(lexeme_table[j].name, buffer);
-					lexeme_table[j].token = ssym[ch];
+					lexeme_table[j].token = gtrsym;
 					lexeme_table[j].error = error;
 
 					j++;
@@ -395,7 +395,7 @@ int main(int argc, char *argv[])
 	printf("\n\nLexeme Table:\n%-32s token type\n", "lexeme");
 	for(i = 0; i < j; i++)
 	{
-		lexeme l = lexeme_table[i];
+		l = lexeme_table[i];
 
 		// This is so ugly oh my god
 		if(l.error > 0)
@@ -406,43 +406,46 @@ int main(int argc, char *argv[])
 			else
 				printf("%-32s ", l.name);
 
-			if(l.error == 1)
+			if(l.error == invalidid)
 				printf("ERROR: Invalid identifier.\n");
 
-			else if(l.error == 2)
+			else if(l.error == numtoolong)
 				printf("ERROR: Number too long.\n");
 
-			else if(l.error == 3)
+			else if(l.error == idtoolong)
 				printf("ERROR: Identifier too long.\n");
 
 			else
 				printf("ERROR: Invalid symbol.\n");
-
-			continue;
 		}
-
-		if(l.token == 3)
-			printf("%-32d %d\n", l.value, l.token);
-
 		else
-			printf("%-32s %d\n", l.name, l.token);
+		{
+			if(l.token == 3)
+				printf("%-32d %d\n", l.value, l.token);
+
+			else
+				printf("%-32s %d\n", l.name, l.token);
+		}
 	}
 
 	printf("\n\nLexeme List:\n");
 	for(i = 0; i < j; i++)
 	{
-		lexeme l = lexeme_table[i];
-		if(l.token == 2)
-			printf("%d %s ", l.token, l.name);
+		l = lexeme_table[i];
+		if(l.error == 0)
+		{
+			if(l.token == identsym)
+				printf("%d %s ", l.token, l.name);
 
-		else if(l.token == 3)
-			printf("%d %d ", l.token, l.value);
+			else if(l.token == numbersym)
+				printf("%d %d ", l.token, l.value);
 
-		else
-			printf("%d ", l.token);
+			else
+				printf("%d ", l.token);
 
-		if((i + 1) < j)
-			printf("| ");
+			if((i + 1) < j)
+				printf("| ");
+		}
 	}
 
 	printf("\n");
