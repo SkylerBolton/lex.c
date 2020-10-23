@@ -314,8 +314,6 @@ int main(int argc, char *argv[])
 				{
 					buffer[i] = ch;
 					i++;
-					if(ch != EOF)
-						printf("%c", ch);
 
 					buffer[i] = '\0';
 
