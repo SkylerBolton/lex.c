@@ -339,6 +339,7 @@ int main(int argc, char *argv[])
 								lexeme_table[j].token = ssym[buffer[0] * 2 + buffer[1]];
 								lexeme_table[j].error = error;
 
+								j++;
 								printf("%c", ch);
 								break;
 							}
