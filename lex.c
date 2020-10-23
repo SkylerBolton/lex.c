@@ -319,10 +319,13 @@ int main(int argc, char *argv[])
 					strcpy(lexeme_table[j].name, buffer);
 					lexeme_table[j].token = ssym[buffer[0] * 2 + buffer[1]];
 					lexeme_table[j].error = error;
-					
+
+					printf("%c", ch);
 					while((ch = fgetc(fp)) != EOF)
+					{
 						if(ch == '*')
 						{
+							printf("%c", ch);
 							ch = fgetc(fp);
 							if(ch == '/') // Exit comment
 							{
@@ -336,14 +339,18 @@ int main(int argc, char *argv[])
 								lexeme_table[j].token = ssym[buffer[0] * 2 + buffer[1]];
 								lexeme_table[j].error = error;
 
+								printf("%c", ch);
 								break;
 							}
 							else
 							{
+								printf("%c", ch);
 								continue;
 							}
-							
+
 						}
+						printf("%c", ch);
+					}
 				}
 				else // "/" token
 				{
