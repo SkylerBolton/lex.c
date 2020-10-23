@@ -312,6 +312,11 @@ int main(int argc, char *argv[])
 				ch = fgetc(fp);
 				if(ch == '*') // Start comment
 				{
+					buffer[i] = ch;
+					i++;
+					if(ch != EOF)
+						printf("%c", ch);
+
 					buffer[i] = '\0';
 
 					// Add lexeme to table
@@ -319,6 +324,8 @@ int main(int argc, char *argv[])
 					strcpy(lexeme_table[j].name, buffer);
 					lexeme_table[j].token = ssym[buffer[0] * 2 + buffer[1]];
 					lexeme_table[j].error = error;
+
+					j++;
 
 					printf("%c", ch);
 					while((ch = fgetc(fp)) != EOF)
