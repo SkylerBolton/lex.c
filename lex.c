@@ -314,6 +314,8 @@ int main(int argc, char *argv[])
 				{
 					buffer[i] = ch;
 					i++;
+					if(ch != EOF)
+						printf("%c", ch);
 
 					buffer[i] = '\0';
 
@@ -325,7 +327,6 @@ int main(int argc, char *argv[])
 
 					j++;
 
-					printf("%c", ch);
 					while((ch = fgetc(fp)) != EOF)
 					{
 						if(ch == '*')
