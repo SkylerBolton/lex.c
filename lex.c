@@ -379,7 +379,7 @@ int main(int argc, char *argv[])
 			continue;
 		}
 
-		if(l.value > 0)
+		if(l.token == 3)
 			printf("%-32d %d\n", l.value, l.token);
 
 		else
