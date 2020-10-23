@@ -85,6 +85,7 @@ int main(int argc, char *argv[])
 	ssym['<'] = lessym;
 	ssym['>'] = gtrsym;
 	ssym[';'] = semicolonsym;
+	ssym[':' * 2 + '='] = becomessym;
 	ssym['<' * 2 + '>'] = neqsym;
 	ssym['<' * 2 + '='] = leqsym;
 	ssym['>' * 2 + '='] = geqsym;
@@ -309,14 +310,39 @@ int main(int argc, char *argv[])
 			else if(ch == '/')
 			{
 				ch = fgetc(fp);
-				if(ch == '*') // Start of comment
+				if(ch == '*') // Start comment
 				{
+					buffer[i] = '\0';
+
+					// Add lexeme to table
+					lexeme_table[j].name = malloc(sizeof(char) * (i+1));
+					strcpy(lexeme_table[j].name, buffer);
+					lexeme_table[j].token = ssym[buffer[0] * 2 + buffer[1]];
+					lexeme_table[j].error = error;
+					
 					while((ch = fgetc(fp)) != EOF)
 						if(ch == '*')
 						{
 							ch = fgetc(fp);
 							if(ch == '/') // Exit comment
+							{
+								char temp = buffer[0];
+								buffer[0] = buffer[1];
+								buffer[1] = temp;
+
+								// Add lexeme to table
+								lexeme_table[j].name = malloc(sizeof(char) * (i+1));
+								strcpy(lexeme_table[j].name, buffer);
+								lexeme_table[j].token = ssym[buffer[0] * 2 + buffer[1]];
+								lexeme_table[j].error = error;
+
 								break;
+							}
+							else
+							{
+								continue;
+							}
+							
 						}
 				}
 				else // "/" token
@@ -330,6 +356,8 @@ int main(int argc, char *argv[])
 					lexeme_table[j].error = error;
 
 					j++;
+
+					continue;
 				}
 			}
 			else // Invalid symbol
